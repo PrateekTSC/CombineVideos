@@ -10,8 +10,9 @@ import AVFoundation
 
 let firstAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-1.mp4")
 let secondAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-2.mp4")
+let thirdAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-3.mp4")
 
-let allAssets = [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl)]
+let allAssets = [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl), AVURLAsset(url: thirdAssetUrl)]
 
 let avComposition = AVMutableComposition()
 var insertTime = CMTime.zero
@@ -19,12 +20,22 @@ var insertTime = CMTime.zero
 let videoTrack = avComposition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
 let audioTrack = avComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
 
+var maxWidth = CGFloat.zero
+var maxHeight = CGFloat.zero
+
 for currAsset in allAssets {
    do {
       let assetDuration = try await currAsset.load(.duration)
       let assetVideo = try await currAsset.loadTracks(withMediaType: .video)[0]
       let assetAudio = try await currAsset.loadTracks(withMediaType: .audio)[0]
       let assetRange = CMTimeRangeMake(start: CMTime.zero, duration: assetDuration)
+      
+      let videoSize = try await assetVideo.load(.naturalSize)
+      let videoWidth = videoSize.width
+      let videoHeight = videoSize.height
+      print("Video Size: \(videoWidth)x\(videoHeight)")
+      maxWidth = max(videoWidth, maxWidth)
+      maxHeight = max(videoHeight, maxHeight)
       
       try videoTrack?.insertTimeRange(assetRange, of: assetVideo, at: insertTime)
       try audioTrack?.insertTimeRange(assetRange, of: assetAudio, at: insertTime)
@@ -34,6 +45,8 @@ for currAsset in allAssets {
       debugPrint(error)
    }
 }
+
+print("Max Video Size: \(maxWidth)x\(maxHeight)")
 
 guard let exportSession = AVAssetExportSession(asset: avComposition, presetName: AVAssetExportPresetHighestQuality) else {
    debugPrint("exportSession Error")
