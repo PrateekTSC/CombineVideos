@@ -21,8 +21,9 @@ if (FileManager.default.fileExists(atPath: "/Users/p.prakash/Downloads/Combined.
 let firstAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-1.mp4")
 let secondAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-2.mp4")
 let thirdAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-3.mp4")
+let fourthAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-4.mp4")
 
-let allAssets = [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl),  AVURLAsset(url: thirdAssetUrl)]
+let allAssets = [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl),  AVURLAsset(url: thirdAssetUrl), AVURLAsset(url: fourthAssetUrl)]
 
 let avComposition = AVMutableComposition()
 var insertTime = CMTime.zero
@@ -86,15 +87,15 @@ for (currIndex, currAsset) in allAssets.enumerated() {
       let assetAudio = try await currAsset.loadTracks(withMediaType: .audio)[0]
       let assetRange = CMTimeRangeMake(start: CMTime.zero, duration: assetDuration)
       
-      try videoTrack?.insertTimeRange(assetRange, of: assetVideo, at: insertTime)
-      try audioTrack?.insertTimeRange(assetRange, of: assetAudio, at: insertTime)
-      
       let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: assetVideo)
       let preferredTransform = try await assetVideo.load(.preferredTransform)
       let scaleBy = scaleFactors[currIndex]
       let newTransform = preferredTransform.scaledBy(x: scaleBy, y: scaleBy)
       layerInstruction.setTransform(newTransform, at: .zero)
       layerInstructions += [layerInstruction]
+      
+      try videoTrack?.insertTimeRange(assetRange, of: assetVideo, at: insertTime)
+      try audioTrack?.insertTimeRange(assetRange, of: assetAudio, at: insertTime)
       
       insertTime = CMTimeAdd(insertTime, assetDuration)
    } catch {
@@ -116,3 +117,5 @@ exportSession.videoComposition = videoComposition
 exportSession.outputURL = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Combined.mp4")
 exportSession.outputFileType = AVFileType.mp4
 await exportSession.export()
+
+print("Completed Export")
