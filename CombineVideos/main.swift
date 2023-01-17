@@ -78,7 +78,7 @@ let videoComposition = AVMutableVideoComposition()
 let renderSize = CGSize(width: xMax, height: yMax)
 videoComposition.renderSize = renderSize
 videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
-var layerInstructions: [AVVideoCompositionLayerInstruction] = []
+let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack!)
 
 for (currIndex, currAsset) in allAssets.enumerated() {
    do {
@@ -87,15 +87,13 @@ for (currIndex, currAsset) in allAssets.enumerated() {
       let assetAudio = try await currAsset.loadTracks(withMediaType: .audio)[0]
       let assetRange = CMTimeRangeMake(start: CMTime.zero, duration: assetDuration)
       
-      let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: assetVideo)
+      try videoTrack?.insertTimeRange(assetRange, of: assetVideo, at: insertTime)
+      try audioTrack?.insertTimeRange(assetRange, of: assetAudio, at: insertTime)
+      
       let preferredTransform = try await assetVideo.load(.preferredTransform)
       let scaleBy = scaleFactors[currIndex]
       let newTransform = preferredTransform.scaledBy(x: scaleBy, y: scaleBy)
-      layerInstruction.setTransform(newTransform, at: .zero)
-      layerInstructions += [layerInstruction]
-      
-      try videoTrack?.insertTimeRange(assetRange, of: assetVideo, at: insertTime)
-      try audioTrack?.insertTimeRange(assetRange, of: assetAudio, at: insertTime)
+      layerInstruction.setTransform(newTransform, at: insertTime)
       
       insertTime = CMTimeAdd(insertTime, assetDuration)
    } catch {
@@ -104,7 +102,7 @@ for (currIndex, currAsset) in allAssets.enumerated() {
 }
 
 let videoCompositionInstruction = AVMutableVideoCompositionInstruction()
-videoCompositionInstruction.layerInstructions = layerInstructions
+videoCompositionInstruction.layerInstructions = [layerInstruction]
 videoCompositionInstruction.timeRange = CMTimeRange(start: .zero, duration: insertTime)
 videoComposition.instructions = [videoCompositionInstruction]
 
