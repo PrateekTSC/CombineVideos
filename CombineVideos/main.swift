@@ -26,7 +26,6 @@ let allAssets = [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl)
 
 let avComposition = AVMutableComposition()
 var insertTime = CMTime.zero
-var totalDuration = CMTime.zero
 
 let videoTrack = avComposition.addMutableTrack(withMediaType: .video, preferredTrackID: kCMPersistentTrackID_Invalid)
 let audioTrack = avComposition.addMutableTrack(withMediaType: .audio, preferredTrackID: kCMPersistentTrackID_Invalid)
@@ -97,7 +96,6 @@ for (currIndex, currAsset) in allAssets.enumerated() {
       layerInstruction.setTransform(newTransform, at: .zero)
       layerInstructions += [layerInstruction]
       
-      // insertTime == totalDuration
       insertTime = CMTimeAdd(insertTime, assetDuration)
    } catch {
       debugPrint(error)
@@ -106,7 +104,6 @@ for (currIndex, currAsset) in allAssets.enumerated() {
 
 let videoCompositionInstruction = AVMutableVideoCompositionInstruction()
 videoCompositionInstruction.layerInstructions = layerInstructions
-// insertTime == totalDuration
 videoCompositionInstruction.timeRange = CMTimeRange(start: .zero, duration: insertTime)
 videoComposition.instructions = [videoCompositionInstruction]
 
