@@ -54,8 +54,10 @@ for currAsset in allAssets {
 
 // Scales & Translations
 var scaleFactors: [CGFloat] = []
+var xTranslations: [CGFloat] = []
+var yTranslations: [CGFloat] = []
 
-// Determine Scaling
+// Determine Scaling & Translating
 for currAsset in allAssets {
    do {
       let assetVideo = try await currAsset.loadTracks(withMediaType: .video)[0]
@@ -69,6 +71,12 @@ for currAsset in allAssets {
       
       print("Scale Factor: \(scaleFactor)")
       scaleFactors += [scaleFactor]
+      
+      let dX = (xMax - (videoWidth * scaleFactor)) / scaleFactor / 2
+      xTranslations += [dX]
+      let dY = (yMax - (videoHeight * scaleFactor)) / scaleFactor / 2
+      yTranslations += [dY]
+      print("Translation: [\(dX), \(dY)]")
    } catch {
       debugPrint(error)
    }
@@ -92,7 +100,9 @@ for (currIndex, currAsset) in allAssets.enumerated() {
       
       let preferredTransform = try await assetVideo.load(.preferredTransform)
       let scaleBy = scaleFactors[currIndex]
-      let newTransform = preferredTransform.scaledBy(x: scaleBy, y: scaleBy)
+      let dX = xTranslations[currIndex]
+      let dY = yTranslations[currIndex]
+      let newTransform = preferredTransform.scaledBy(x: scaleBy, y: scaleBy).translatedBy(x: dX, y: dY)
       layerInstruction.setTransform(newTransform, at: insertTime)
       
       insertTime = CMTimeAdd(insertTime, assetDuration)
