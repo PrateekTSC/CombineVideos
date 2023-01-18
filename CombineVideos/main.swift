@@ -8,32 +8,27 @@
 import Foundation
 import AVFoundation
 
+let fileNames = ["Solution-1", "Solution-2"]
+
 // Delete Previous Combined
-deletePrevious()
+deletePrevious(fileNames)
 
 // Build Assets
 let allAssets = buildAssets()
 
 // Various Solutions
-await combineVideos(allAssets)
-await combineVideos(allAssets, renderX: 1300, renderY: 600)
+await combineVideos(allAssets, outputName: fileNames[0])
+await combineVideos(allAssets, renderX: 1300, renderY: 600, outputName:  fileNames[1])
 
-func deletePrevious() {
-   if (FileManager.default.fileExists(atPath: "/Users/p.prakash/Downloads/Solution-1.mp4")) {
-      do {
-         try FileManager.default.removeItem(at: URL(fileURLWithPath: "/Users/p.prakash/Downloads/Solution-1.mp4"))
-         print("Deleted Previous Solution-1")
-      } catch {
-         debugPrint(error)
-      }
-   }
-   
-   if (FileManager.default.fileExists(atPath: "/Users/p.prakash/Downloads/Solution-2.mp4")) {
-      do {
-         try FileManager.default.removeItem(at: URL(fileURLWithPath: "/Users/p.prakash/Downloads/Solution-2.mp4"))
-         print("Deleted Previous Solution-2")
-      } catch {
-         debugPrint(error)
+func deletePrevious(_ fileNames: [String]) {
+   for fileName in fileNames {
+      if (FileManager.default.fileExists(atPath: "/Users/p.prakash/Downloads/\(fileName).mp4")) {
+         do {
+            try FileManager.default.removeItem(at: URL(fileURLWithPath: "/Users/p.prakash/Downloads/\(fileName).mp4"))
+            print("Deleted Previous \(fileName)")
+         } catch {
+            debugPrint(error)
+         }
       }
    }
 }
@@ -47,7 +42,7 @@ func buildAssets() -> [AVURLAsset] {
    return [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl),  AVURLAsset(url: thirdAssetUrl), AVURLAsset(url: fourthAssetUrl)]
 }
 
-func combineVideos(_ allAssets: [AVURLAsset]) async {
+func combineVideos(_ allAssets: [AVURLAsset], outputName: String) async {
    // Max Dimensions
    var xMax = CGFloat.zero
    var yMax = CGFloat.zero
@@ -69,10 +64,10 @@ func combineVideos(_ allAssets: [AVURLAsset]) async {
       }
    }
    
-   await combineVideos(allAssets, renderX: xMax, renderY: yMax)
+   await combineVideos(allAssets, renderX: xMax, renderY: yMax, outputName: outputName)
 }
 
-func combineVideos(_ allAssets: [AVURLAsset], renderX: CGFloat, renderY: CGFloat) async {
+func combineVideos(_ allAssets: [AVURLAsset], renderX: CGFloat, renderY: CGFloat, outputName: String) async {
    
    let avComposition = AVMutableComposition()
    var insertTime = CMTime.zero
@@ -150,7 +145,7 @@ func combineVideos(_ allAssets: [AVURLAsset], renderX: CGFloat, renderY: CGFloat
       exit(-1)
    }
    exportSession.videoComposition = videoComposition
-   exportSession.outputURL = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Solution-2.mp4")
+   exportSession.outputURL = URL(fileURLWithPath: "/Users/p.prakash/Downloads/\(outputName).mp4")
    exportSession.outputFileType = AVFileType.mp4
    await exportSession.export()
    
