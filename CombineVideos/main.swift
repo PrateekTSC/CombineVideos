@@ -8,17 +8,20 @@
 import Foundation
 import AVFoundation
 
-let fileNames = ["Solution-1", "Solution-2"]
+let fileNamesOne = ["Solution-1", "Solution-2"]
+let fileNamesTwo = ["Solution-3", "Solution-4"]
 
-// Delete Previous Combined
-deletePrevious(fileNames)
+deletePrevious(fileNamesOne)
+deletePrevious(fileNamesTwo)
 
-// Build Assets
-let allAssets = buildAssets()
+let assetsOne = buildAssetsOne()
+let assetsTwo = buildAssetsTwo()
 
-// Various Solutions
-await combineVideos(allAssets, outputName: fileNames[0])
-await combineVideos(allAssets, renderX: 1300, renderY: 600, outputName:  fileNames[1])
+await combineVideos(assetsOne, outputName: fileNamesOne[0])
+await combineVideos(assetsOne, renderX: 1300, renderY: 600, outputName:  fileNamesOne[1])
+
+await combineVideos(assetsTwo, outputName: fileNamesTwo[0])
+await combineVideos(assetsTwo, renderX: 1300, renderY: 600, outputName:  fileNamesTwo[1])
 
 func deletePrevious(_ fileNames: [String]) {
    for fileName in fileNames {
@@ -33,13 +36,20 @@ func deletePrevious(_ fileNames: [String]) {
    }
 }
 
-func buildAssets() -> [AVURLAsset] {
+func buildAssetsOne() -> [AVURLAsset] {
    let firstAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-1.mp4")
    let secondAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-2.mp4")
    let thirdAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-3.mp4")
    let fourthAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-4.mp4")
    
    return [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl),  AVURLAsset(url: thirdAssetUrl), AVURLAsset(url: fourthAssetUrl)]
+}
+
+func buildAssetsTwo() -> [AVURLAsset] {
+   let firstAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-5.mp4")
+   let secondAssetUrl = URL(fileURLWithPath: "/Users/p.prakash/Downloads/Video-6.mp4")
+   
+   return [AVURLAsset(url: firstAssetUrl), AVURLAsset(url: secondAssetUrl)]
 }
 
 func combineVideos(_ allAssets: [AVURLAsset], outputName: String) async {
